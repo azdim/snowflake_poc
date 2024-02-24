@@ -1,0 +1,61 @@
+name: Deploy Pipeline
+
+
+on:
+  push:
+    'main'
+  pull_request:
+    'main'
+  paths-ignore:
+    - 'database/*'
+    - 'roles/*'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Init
+        id: init
+        run: |
+          terraform init
+      - name: Terraform Validate
+        id: Validate
+        run: |
+          terraform validate
+      - name: Terraform Apply
+        if: ${{ github.event_name != 'pull_request' }} && env.GITHUB_HEAD_REF == 'main'
+        id: apply
+        run: |
+          terraform plan -var-file='./inputs/dev/inputs.tfvars' -var 'password=${{secrets.SNOWFLAKE_PASSWORD}}' -no-color
+  apply:
+    runs-on: ubuntu
+    needs: plan
+    environment: deploy
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Init
+        id: init
+        run: |
+          terraform init
+      - name: Terraform Validate
+        id: Validate
+        run: |
+          terraform validate
+      - name: Terraform Apply
+        if: ${{ github.event_name != 'pull_request' }} && env.GITHUB_HEAD_REF == 'main'
+        id: apply
+        run: |
+          terraform apply -var-file='./inputs/dev/inputs.tfvars' -var 'password=${{secrets.SNOWFLAKE_PASSWORD}}' -no-color
+      
+  

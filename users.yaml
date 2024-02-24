@@ -1,0 +1,14 @@
+---
+users:
+  description: "User information"
+  information:
+    elmira:
+      name: "Elmira"
+      login_name: "elmira"
+      comment: "Data engineer"
+      display_name: "Elmira"
+      email: "elmira@elmira.com"
+      first_name: "Elmira"
+      last_name: "Ahmedova"
+      privilege: "MONITOR"
+      roles: ["role1", "role2"]
